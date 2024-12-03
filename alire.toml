@@ -26,3 +26,8 @@ development.contracts = "Yes"
 
 [[depends-on]]
 gnat = "<2000" # Uses Ada 83 syntax absent in gnat gpl
+diana = "~0.1.0"
+
+[[pins]]
+diana = { url='https://github.com/reznikmm/diana/' }
+

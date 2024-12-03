@@ -3,6 +3,8 @@
 --  SPDX-License-Identifier: Apache-2.0 WITH LLVM-exception
 ----------------------------------------------------------------
 
+with USERPK;
+
 procedure TDF_Ada_83 is
 begin
    null;
