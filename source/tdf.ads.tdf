@@ -1,0 +1,173 @@
+@use all
+@special access
+--  SPDX-FileCopyrightText: 2024 Max Reznik <reznikmm@gmail.com>
+--
+--  SPDX-License-Identifier: Apache-2.0 WITH LLVM-exception
+----------------------------------------------------------------
+
+--
+--  AUTOMATICALLY GENERATED FROM TDF %VA.%VB
+--  BY %ZX (VERSION %ZV), DO NOT EDIT
+--
+
+with Bytes;
+with TDF_Buildins;
+
+package TDF is
+
+   Version_Major : constant := %VA;
+   Version_Minor : constant := %VB;
+
+   subtype TDFIDENT is TDF_Buildins.TDFIDENT;
+   subtype TDFINT is TDF_Buildins.TDFINT;
+   subtype File_Name is String;
+
+@loop sort
+@if sort.special
+   type %ST_SORT is private;
+@else
+@if sort.option
+   type %ST is private;
+@else
+@if sort.list
+   type %ST is private;
+@else
+@if sort.slist
+   type %ST is private;
+@else
+@if !sort.builtin
+   type %ST is private;
+@endif
+@endif
+@endif
+@endif
+@endif
+@end
+
+@loop sort
+@if sort.option
+   function None return %ST;
+   function Option (Item : %SST%
+@if sort.sub.special
+_SORT%
+@endif
+) return %ST;
+
+@else
+@if sort.list
+   function List (Item : %SST) return %ST;
+
+   procedure Append
+     (Self : in out %ST;
+      Item : %SST);
+
+@else
+@if sort.slist
+   function List (Item : %SST) return %ST;
+
+   procedure Append
+     (Self : in out %ST;
+      Item : %SST);
+
+@else
+@if sort.unit
+   function To_BYTESTREAM (Self : %ST) return TDF_Buildins.BYTESTREAM;
+
+@endif
+@endif
+@endif
+@endif
+@end
+
+@loop sort
+@loop sort.cons
+@if cons.params
+   function c_%CN
+@loop cons.param
+@if param.first
+     (%
+@else
+      %
+@endif
+@if param.sort.special
+p_%PN : %PSST_SORT%
+@else
+@if param.sort.option
+p_%PN : %PSST_OPTION%
+@else
+@if param.sort.list
+p_%PN : %PSST_LIST%
+@else
+@if param.sort.slist
+p_%PN : %PSST_LIST%
+@else
+@if param.sort.builtin
+p_%PN : TDF_Buildins.%PST%
+@else
+p_%PN : %PST%
+@endif
+@endif
+@endif
+@endif
+@endif
+@if param.last
+)
+@else
+;
+@endif
+@end
+@comment end loop cons.param
+     return%
+@else
+   function c_%CN return%
+@endif
+@if sort.special
+ %CST_SORT;
+@else
+ %CST;
+@endif
+
+@end
+@end
+   procedure Write
+     (Name  : File_Name;
+      Value : CAPSULE);
+
+private
+
+@loop sort
+@if sort.special
+   type %ST_SORT is record
+      Data : Bytes.Bit_Vector;
+   end record;
+@else
+@if sort.option
+   type %ST is record
+      Data : Bytes.Bit_Vector;
+   end record;
+@else
+@if sort.list
+   type %ST is record
+      Count : Natural := 0;
+      Data  : Bytes.Bit_Vector;
+   end record;
+@else
+@if sort.slist
+   type %ST is record
+      Count : Natural := 0;  --  %SST
+      Data  : Bytes.Bit_Vector;
+   end record;
+@else
+@if !sort.builtin
+   type %ST is record
+      Data : Bytes.Bit_Vector;
+   end record;
+@endif
+@endif
+@endif
+@endif
+@endif
+
+@end
+
+end TDF;

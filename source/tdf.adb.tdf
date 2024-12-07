@@ -1,0 +1,187 @@
+@use all
+@special access
+--  SPDX-FileCopyrightText: 2024 Max Reznik <reznikmm@gmail.com>
+--
+--  SPDX-License-Identifier: Apache-2.0 WITH LLVM-exception
+----------------------------------------------------------------
+
+--
+--  AUTOMATICALLY GENERATED FROM TDF %VA.%VB
+--  BY %ZX (VERSION %ZV), DO NOT EDIT
+--
+
+with Sequential_IO;
+
+package body TDF is
+
+   package Byte_IO is new Sequential_IO (Bytes.Byte);
+
+   procedure Write
+     (Name  : File_Name;
+      Value : CAPSULE) is separate;
+
+   procedure Append_Extended
+     (Result : in out Bytes.Bit_Vector;
+      Value  : Natural;
+      Count  : Natural) is
+   begin
+      if Value >= 2 ** Count then
+         Bytes.Append (Result, 0, Count);
+         Append_Extended (Result, Value - 2 ** Count, Count);
+      else
+         Bytes.Append (Result, Value, Count);
+      end if;
+   end Append_Extended;
+
+@loop sort
+@if sort.option
+   function None return %ST is
+      Result : Bytes.Bit_Vector;
+   begin
+      Bytes.Append (Result, 0, 1);
+      return (Data => Result);
+   end None;
+
+   function Option (Item : %SST%
+@if sort.sub.special
+_SORT%
+@endif
+) return %ST is
+      Result : Bytes.Bit_Vector;
+   begin
+      Bytes.Append (Result, 1, 1);
+      Bytes.Append_Vector (Result, Item.Data);
+      return (Data => Result);
+   end Option;
+
+@else
+@if sort.list
+   function List (Item : %SST) return %ST is
+      Result : %ST;
+   begin
+      Append (Result, Item);
+      return Result;
+   end List;
+
+   procedure Append
+     (Self : in out %ST;
+      Item : %SST) is
+   begin
+      Self.Count := Self.Count + 1;
+      Bytes.Append_Vector (Self.Data, Item.Data);
+      Bytes.Unchecked_Free (Item.Data);
+   end Append;
+
+@else
+@if sort.slist
+   function List (Item : %SST) return %ST is
+      Result : %ST;
+   begin
+      Append (Result, Item);
+      return Result;
+   end List;
+
+   procedure Append
+     (Self : in out %ST;
+      Item : %SST) is
+   begin
+      Self.Count := Self.Count + 1;
+      Bytes.Append_Vector (Self.Data, Item.Data);
+      Bytes.Unchecked_Free (Item.Data);
+   end Append;
+
+@else
+@if sort.unit
+   function To_BYTESTREAM (Self : %ST) return TDF_Buildins.BYTESTREAM is
+      Result : constant TDF_Buildins.BYTESTREAM :=
+        TDF_Buildins.To_BYTESTREAM (Self.Data);
+   begin
+      return Result;      
+   end To_BYTESTREAM;
+
+@endif
+@endif
+@endif
+@endif
+@end
+
+@loop sort
+@loop sort.cons
+@if cons.params
+   function c_%CN
+@loop cons.param
+@if param.first
+     (%
+@else
+      %
+@endif
+@if param.sort.special
+p_%PN : %PSST_SORT%
+@else
+@if param.sort.option
+p_%PN : %PSST_OPTION%
+@else
+@if param.sort.list
+p_%PN : %PSST_LIST%
+@else
+@if param.sort.slist
+p_%PN : %PSST_LIST%
+@else
+@if param.sort.builtin
+p_%PN : TDF_Buildins.%PST%
+@else
+p_%PN : %PST%
+@endif
+@endif
+@endif
+@endif
+@endif
+@if param.last
+)
+@else
+;
+@endif
+@end
+@comment end loop cons.param
+     return%
+@else
+
+   function c_%CN return%
+@endif
+@if sort.special
+ %CST_SORT%
+@else
+ %CST%
+@endif
+ is
+      Result : Bytes.Bit_Vector;
+   begin
+@if !sort.dummy
+@if sort.extends
+      Append_Extended (Result, %CE, %SB);
+@else
+      Bytes.Append (Result, %CE, %SB);
+@endif
+@endif
+@loop cons.param
+@if param.align
+      Bytes.Align (Result);
+@endif
+@if param.sort.list
+      Bytes.Append (Result, 0, 1);
+      TDF_Buildins.Append_TDFINT (Result, p_%PN.Count);
+@else
+@if param.sort.slist
+      TDF_Buildins.Append_TDFINT (Result, p_%PN.Count);
+@endif
+@endif
+      Bytes.Append_Vector (Result, p_%PN.Data);
+      Bytes.Unchecked_Free (p_%PN.Data);
+@end
+      return (Data => Result);
+   end c_%CN;
+
+@end
+@end
+
+end TDF;
