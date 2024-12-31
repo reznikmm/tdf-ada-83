@@ -11,13 +11,37 @@ with DIANAMAN;
 with PRINTNOD;
 
 with Assertions;
+with Walk_Tree;
 
 package body Walk_Compilation_Unit is
 
-   procedure Set_Enclosing_Defining_Name
-     (Self  : in out Contexts.Context;
-      Node  : USERPK.TREE;
-      Value : USERPK.TREE);
+   procedure Pre_Operation
+     (Node    : USERPK.TREE;
+      Context : in out Contexts.Context;
+      Value   : USERPK.TREE;
+      Ignore  : in out Walk_Tree.Traverse_Control);
+
+   procedure Set_Enclosing_Defining_Name is new
+     Walk_Tree.Pre_Traverse_With_Context_RO (USERPK.TREE, Pre_Operation);
+
+   procedure Pre_Operation
+     (Node    : USERPK.TREE;
+      Context : in out Contexts.Context;
+      Value   : USERPK.TREE;
+      Ignore  : in out Walk_Tree.Traverse_Control)
+   is
+      Down : USERPK.TREE := Value;
+   begin
+      case DIANA.Kind (Node) is
+         when DIANA.Class_ID_DECL =>
+            Down := DIANA.D (DIANATTR.AS_SOURCE_NAME, Node);
+            Set_Enclosing_Defining_Name (Down, Context, Value);
+         when DIANA.Class_SOURCE_NAME =>
+            Contexts.Set_Enclosing_Defining_Name (Context, Node, Value);
+         when others =>
+            null;
+      end case;
+   end Pre_Operation;
 
    --------------------------
    -- Pass_Transitive_With --
@@ -32,7 +56,7 @@ package body Walk_Compilation_Unit is
    begin
       Assertions.Check_Kind (Unit, DIANA.DN_COMPILATION_UNIT);
       PRINTNOD.PRINT_NODE (Unit, 10);
-      Set_Enclosing_Defining_Name (Self, Unit, DIANAMAN.CONST_NIL);
+      Set_Enclosing_Defining_Name (Unit, Self, DIANAMAN.CONST_NIL);
 
       List := DIANAMAN.LIST (Unit);
 
@@ -40,56 +64,8 @@ package body Walk_Compilation_Unit is
          DIANAMAN.POP (List, Item);
          Item := DIANA.D (DIANATTR.TW_COMP_UNIT, Item);
          Assertions.Check_Kind (Item, DIANA.DN_COMPILATION_UNIT);
-         Set_Enclosing_Defining_Name (Self, Item, DIANAMAN.CONST_NIL);
+         Set_Enclosing_Defining_Name (Item, Self, DIANAMAN.CONST_NIL);
       end loop;
    end Pass_Transitive_With;
-
-   ---------------------------------
-   -- Set_Enclosing_Defining_Name --
-   ---------------------------------
-
-   procedure Set_Enclosing_Defining_Name
-     (Self  : in out Contexts.Context;
-      Node  : USERPK.TREE;
-      Value : USERPK.TREE)
-   is
-      use USERPK;
-      Down : USERPK.TREE := Value;
-   begin
-      if Node.TPG <= 0
-        or else Node.TLN = 0
-        or else DIANA.Kind (Node) not in DIANA.CLASS_ALL_SOURCE
-        or else Contexts.Has_Defining_Name (Self, Node)
-      then
-         return;
-      end if;
-
-      case DIANA.Kind (Node) is
-         when DIANA.Class_ID_DECL =>
-            Down := DIANA.D (DIANATTR.AS_SOURCE_NAME, Node);
-            Set_Enclosing_Defining_Name (Self, Down, Value);
-         when DIANA.Class_SOURCE_NAME =>
-            Contexts.Set_Enclosing_Defining_Name (Self, Node, Value);
-         when others =>
-            null;
-      end case;
-
-      if DIANAMAN.ARITY (Node) = ARBITRARY then
-         declare
-            Item : USERPK.Tree;
-            List : USERPK.SEQ_TYPE;
-         begin
-            List := DIANAMAN.LIST (Node);
-            while not DIANAMAN.IS_EMPTY(List) loop
-               DIANAMAN.POP(List, Item);
-               Set_Enclosing_Defining_Name (Self, Item, Down);
-            end loop;
-         end;
-      else
-         for I in 1 .. USERPK.ARITIES'POS (DIANAMAN.ARITY (Node)) loop
-            Set_Enclosing_Defining_Name (Self, DIANAMAN.DABS(I, Node), Down);
-         end loop;
-      end if;
-   end Set_Enclosing_Defining_Name;
 
 end Walk_Compilation_Unit;
