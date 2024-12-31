@@ -124,8 +124,10 @@ package body Walk_Tree is
 
          else
             for J in 1 .. ARITIES'POS(DIANAMAN.ARITY (Element)) loop
+               State := Continue;
+
                Traverse
-                 (DIANAMAN.DABS(J,Element), Context, Data, State);
+                 (DIANAMAN.DABS (J, Element), Context, Data, State);
 
                if State = Terminate_Immediately then
                   return;

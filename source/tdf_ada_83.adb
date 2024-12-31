@@ -24,7 +24,7 @@ begin
 
    begin
       Contexts.Initialize (Context, User_Root);
-      Diana_Compilation.Pass (User_Root, Capsule);
+      Diana_Compilation.Pass (Context, User_Root, Capsule);
       TDF_Capsules.Write (Capsule);
    end;
 
